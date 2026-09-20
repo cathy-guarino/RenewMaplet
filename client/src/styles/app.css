@@ -1,0 +1,25 @@
+/*
+ * Application-wide base styles. Product styling belongs in components;
+ * only shell-level defaults live here.
+ */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    /* Light-only product: opt out of UA dark-mode form control theming. */
+    color-scheme: light;
+    margin: 0;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+}

@@ -1,12 +1,13 @@
 {
-	"name": "server",
-	"scripts": {
-		"dev": "wrangler dev"
-	},
-	"dependencies": {
-		"hono": "^4.8.3"
-	},
-	"devDependencies": {
-		"wrangler": "latest"
-	}
+  "name": "server",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "hono": "^4.8.3"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
 }

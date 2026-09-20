@@ -1,0 +1,141 @@
+/*
+ * RenewMaplet theme tokens.
+ *
+ * Light mode only — BEHAVIOUR_GUIDE.md rules out parallel themes, so there is
+ * deliberately no `.dark` block and no `prefers-color-scheme` override here.
+ * Palette values come from the "Visual language" section of that guide.
+ *
+ * `:root` holds the raw values; `@theme inline` maps them to Tailwind utilities
+ * so `bg-surface`, `text-muted-foreground`, `h-control` etc. resolve to tokens
+ * rather than hardcoded values.
+ */
+
+:root {
+  /* Surfaces and text */
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+  --surface: #ffffff;
+  --scope: #f5f5f5;
+  --muted: #f2f2f2;
+  --muted-foreground: #666666;
+  --border: #e5e5e5;
+
+  /* Global header */
+  --header: #27272a;
+  --header-foreground: #fafafa;
+
+  /* shadcn/ui contract — mapped onto the palette above. */
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --primary: #0a0a0a;
+  --primary-foreground: #fafafa;
+  --secondary: var(--muted);
+  --secondary-foreground: var(--foreground);
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --destructive: #dc2626;
+  --destructive-foreground: #fafafa;
+  --input: var(--border);
+  --ring: #a1a1aa;
+
+  /* Technology — compact colored squares. Semantic, not screen-specific. */
+  --technology-battery: #a78bfa;
+  --technology-coal: #94a3b8;
+  --technology-distillate: #f472b6;
+  --technology-gas: #fb923c;
+  --technology-wind: #60a5fa;
+  --technology-solar: #fbbf24;
+  --technology-hydro: #38bdf8;
+  --technology-other: #5eead4;
+
+  /* Unit status — small symbols on very light circles. */
+  --status-operating: #16a34a;
+  --status-operating-surface: #f0fdf4;
+  --status-committed: #ca8a04;
+  --status-committed-surface: #fefce8;
+  --status-retired: #9ca3af;
+  --status-retired-surface: #f4f4f5;
+  --status-unknown: #a1a1aa;
+  --status-unknown-surface: #fafafa;
+
+  /* Relative-share bar */
+  --bar-fill: #0a0a0a;
+  --bar-track: #ececec;
+
+  /* Typography */
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Radii */
+  --radius: 0.5rem;
+
+  /* Layout and control sizing — see BEHAVIOUR_GUIDE.md "Page structure". */
+  --header-height: 52px;
+  --scope-panel-width: 264px;
+  --control-height: 2rem; /* 32px */
+  --row-height: 3.5rem; /* 56px */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-scope: var(--scope);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-technology-battery: var(--technology-battery);
+  --color-technology-coal: var(--technology-coal);
+  --color-technology-distillate: var(--technology-distillate);
+  --color-technology-gas: var(--technology-gas);
+  --color-technology-wind: var(--technology-wind);
+  --color-technology-solar: var(--technology-solar);
+  --color-technology-hydro: var(--technology-hydro);
+  --color-technology-other: var(--technology-other);
+
+  --color-status-operating: var(--status-operating);
+  --color-status-operating-surface: var(--status-operating-surface);
+  --color-status-committed: var(--status-committed);
+  --color-status-committed-surface: var(--status-committed-surface);
+  --color-status-retired: var(--status-retired);
+  --color-status-retired-surface: var(--status-retired-surface);
+  --color-status-unknown: var(--status-unknown);
+  --color-status-unknown-surface: var(--status-unknown-surface);
+
+  --color-bar-fill: var(--bar-fill);
+  --color-bar-track: var(--bar-track);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --spacing-header: var(--header-height);
+  --spacing-scope-panel: var(--scope-panel-width);
+  --spacing-control: var(--control-height);
+  --spacing-row: var(--row-height);
+}

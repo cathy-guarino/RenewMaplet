@@ -7,15 +7,31 @@
     "server"
   ],
   "scripts": {
-    "test": "vitest",
-    "dev": "concurrently --kill-others-on-fail \"yarn workspace client dev\" \"yarn workspace server dev\""
+    "dev": "concurrently --kill-others-on-fail \"yarn workspace client dev\" \"yarn workspace server dev\"",
+    "build": "yarn typecheck && yarn workspace client build",
+    "typecheck": "yarn workspace client typecheck && yarn workspace server typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "yarn workspace client test",
+    "test:watch": "yarn workspace client test:watch",
+    "check": "yarn typecheck && yarn lint && yarn format:check && yarn test"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250701.0",
+    "@eslint/js": "^10.0.1",
     "concurrently": "^7.3.0",
     "dotenv": "^16.4.5",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.8",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "^5.5.3",
-    "vitest": "^2.1.8",
+    "typescript-eslint": "^8.70.0",
     "yarn": "^1.22.19"
   },
   "packageManager": "yarn@3.4.1"

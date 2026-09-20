@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+
+# Tool-managed / generated
+.yarn
+.yarnrc.yml
+yarn.lock
+.wrangler
+
+# Prose is edited by hand; keep diffs readable.
+*.md

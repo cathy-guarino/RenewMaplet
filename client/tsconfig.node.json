@@ -13,13 +13,18 @@
     "moduleDetection": "force",
     "noEmit": true,
 
-    /* Linting */
+    /* Strictness */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+
+    "types": ["node"]
   },
   "include": ["vite.config.ts"]
 }
