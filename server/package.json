@@ -2,12 +2,14 @@
   "name": "server",
   "scripts": {
     "dev": "wrangler dev",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "hono": "^4.8.3"
   },
   "devDependencies": {
+    "vitest": "^5",
     "wrangler": "latest"
   }
 }

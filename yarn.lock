@@ -6044,6 +6044,7 @@ __metadata:
   resolution: "server@workspace:server"
   dependencies:
     hono: ^4.8.3
+    vitest: ^5
     wrangler: latest
   languageName: unknown
   linkType: soft

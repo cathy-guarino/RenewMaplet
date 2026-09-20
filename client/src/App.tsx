@@ -1,48 +1,55 @@
-import { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useFacilities } from '@/app/use-facilities'
+import type { Facility } from '@/data/types'
+import { DEFAULT_SCOPE, applyScope } from '@/domain/scope'
+import { totalsForScope } from '@/domain/summary'
 
 /**
- * Placeholder shell. This only proves the foundation wiring — Tailwind tokens,
- * Geist Sans, shadcn primitives and the Worker proxy. Product UI arrives in a
- * later stage; see BUILD_LOG.md.
+ * Placeholder shell for the live-data stage. It renders only enough to exercise
+ * the full request path — loading, error and success. Scope controls and the
+ * grouped results arrive in the next stage; see BUILD_LOG.md.
  */
 function App() {
-  const [message, setMessage] = useState<string | null>(null)
-  const [attempt, setAttempt] = useState(0)
-
-  useEffect(() => {
-    let abort = false
-
-    fetch('/api/message').then(async (res) => {
-      if (!res.ok) return
-      const body = (await res.json()) as { message: string }
-      if (abort) return
-      setMessage(body.message)
-    })
-
-    return () => {
-      abort = true
-    }
-  }, [attempt])
-
-  const reload = useCallback(() => {
-    setMessage(null)
-    setAttempt((n) => n + 1)
-  }, [])
+  const { state, reload } = useFacilities()
 
   return (
     <main className="mx-auto flex max-w-2xl flex-col items-start gap-4 p-10">
       <h1 className="text-2xl font-semibold tracking-tight">RenewMaplet</h1>
-      <p className="text-sm text-muted-foreground">
-        Foundation stage. The starter still runs; the explorer is not built yet.
-      </p>
-      <div className="w-full rounded-lg border border-border bg-surface p-4 text-sm">
-        {message ?? '🌀🌀🌀'}
-      </div>
-      <Button variant="outline" size="sm" onClick={reload}>
-        Reload message
+
+      {state.status === 'loading' && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Loading facilities…
+        </p>
+      )}
+
+      {state.status === 'error' && (
+        <div
+          role="alert"
+          className="w-full rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"
+        >
+          <p className="font-medium">Could not load facilities.</p>
+          <p className="mt-1 text-muted-foreground">{state.message}</p>
+        </div>
+      )}
+
+      {state.status === 'ready' && <ScopeTotals facilities={state.facilities} />}
+
+      <Button variant="outline" size="sm" onClick={reload} disabled={state.status === 'loading'}>
+        Reload
       </Button>
     </main>
+  )
+}
+
+/** Proof the parsed data reached the UI, not the product summary. */
+function ScopeTotals({ facilities }: { facilities: readonly Facility[] }) {
+  const totals = totalsForScope(applyScope(facilities, DEFAULT_SCOPE))
+
+  return (
+    <p className="w-full rounded-lg border border-border bg-surface p-4 text-sm">
+      {totals.facilityCount.toLocaleString()} facilities ·{' '}
+      {totals.registeredMw.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW
+    </p>
   )
 }
 

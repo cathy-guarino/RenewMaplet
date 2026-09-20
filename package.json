@@ -14,7 +14,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "yarn workspace client test",
+    "test": "yarn workspace client test && yarn workspace server test",
     "test:watch": "yarn workspace client test:watch",
     "check": "yarn typecheck && yarn lint && yarn format:check && yarn test"
   },
