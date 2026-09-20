@@ -38,10 +38,15 @@ export function ErrorState({ detail, onRetry }: { detail?: string; onRetry: () =
   )
 }
 
-export function EmptyState() {
+export function EmptyState({ onClear }: { onClear?: () => void }) {
   return (
-    <div className="flex h-full items-start justify-center pt-24">
+    <div className="flex h-full flex-col items-center justify-start gap-4 pt-24">
       <p className="text-sm text-muted-foreground">No facilities match this scope.</p>
+      {onClear ? (
+        <Button variant="outline" size="sm" onClick={onClear} className="bg-surface shadow-none">
+          Clear filters
+        </Button>
+      ) : null}
     </div>
   )
 }

@@ -1,12 +1,9 @@
+import { useRef } from 'react'
 import { AppHeader } from '@/components/app-header'
-import { ResultsPanel } from '@/components/results-panel'
-import { EmptyState, ErrorState, LoadingState } from '@/components/results-states'
-import { ScopePanel } from '@/components/scope-panel'
+import { ErrorState, LoadingState } from '@/components/results-states'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { FacilityExplorer, type FacilityExplorerHandle } from '@/app/facility-explorer'
 import { useFacilities } from '@/app/use-facilities'
-import type { Facility } from '@/data/types'
-import { DEFAULT_SCOPE, applyScope } from '@/domain/scope'
-import { totalsForScope } from '@/domain/summary'
 
 /**
  * Application shell.
@@ -17,17 +14,22 @@ import { totalsForScope } from '@/domain/summary'
  *
  * Loading and error replace the whole body rather than sitting beside an empty
  * scope panel: on first load there is nothing to scope yet, which is what
- * reference/07 and /08 show. Empty is different — data arrived but the scope
- * matched nothing — so it stays inside the results region with the scope panel
- * present, per BEHAVIOUR_GUIDE.md.
+ * reference/07 and /08 show. A no-results scope is different — data arrived but
+ * nothing matched — so it stays inside the results region with the shell
+ * intact, per BEHAVIOUR_GUIDE.md.
  */
 export function App() {
   const { state, reload } = useFacilities()
+  const explorer = useRef<FacilityExplorerHandle>(null)
 
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex h-full flex-col">
-        <AppHeader onReset={reload} />
+        <AppHeader
+          onReset={() => {
+            explorer.current?.reset()
+          }}
+        />
 
         {state.status === 'loading' && (
           <div className="min-h-0 flex-1">
@@ -41,39 +43,10 @@ export function App() {
           </div>
         )}
 
-        {state.status === 'ready' && <Explorer facilities={state.facilities} />}
+        {state.status === 'ready' && (
+          <FacilityExplorer ref={explorer} facilities={state.facilities} />
+        )}
       </div>
     </TooltipProvider>
-  )
-}
-
-function Explorer({ facilities }: { facilities: readonly Facility[] }) {
-  const scoped = applyScope(facilities, DEFAULT_SCOPE)
-  const totals = totalsForScope(scoped)
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-      <aside className="w-full shrink-0 border-b border-border bg-scope md:h-full md:w-scope-panel md:overflow-y-auto md:border-r md:border-b-0">
-        <ScopePanel />
-      </aside>
-
-      <main className="min-h-0 min-w-0 flex-1 md:h-full md:overflow-y-auto">
-        <ResultsPanel
-          title="Facilities by technology"
-          totals={`${totals.facilityCount.toLocaleString()} facilities · ${totals.registeredMw.toLocaleString(undefined, { maximumFractionDigits: 1 })} MW`}
-        >
-          {totals.facilityCount === 0 ? <EmptyState /> : <ResultsPlaceholder />}
-        </ResultsPanel>
-      </main>
-    </div>
-  )
-}
-
-/** Structural stand-in for the grouped results, which arrive next stage. */
-function ResultsPlaceholder() {
-  return (
-    <div className="px-main-gutter py-4 text-label text-muted-foreground">
-      Grouped results appear here.
-    </div>
   )
 }
