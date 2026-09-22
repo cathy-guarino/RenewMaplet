@@ -64,9 +64,9 @@ export function ScopePanel({
       />
 
       <MultiScopeFilter<UnitStatus>
-        label="Lifecycles"
+        label="Unit status"
         icon={<Activity className={ICON} />}
-        allLabel="All lifecycles"
+        allLabel="All unit statuses"
         options={options.statuses}
         selected={scope.statuses}
         onChange={(statuses) => {

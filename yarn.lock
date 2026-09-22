@@ -4022,13 +4022,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.4.5":
-  version: 16.6.1
-  resolution: "dotenv@npm:16.6.1"
-  checksum: e8bd63c9a37f57934f7938a9cf35de698097fadf980cb6edb61d33b3e424ceccfe4d10f37130b904a973b9038627c2646a3365a904b4406514ea94d7f1816b69
-  languageName: node
-  linkType: hard
-
 "eastasianwidth@npm:^0.2.0":
   version: 0.2.0
   resolution: "eastasianwidth@npm:0.2.0"
@@ -5891,7 +5884,6 @@ __metadata:
     "@cloudflare/workers-types": ^4.20250701.0
     "@eslint/js": ^10.0.1
     concurrently: ^7.3.0
-    dotenv: ^16.4.5
     eslint: ^10.11.0
     eslint-config-prettier: ^10.1.8
     eslint-plugin-react-hooks: ^7.1.1
@@ -5901,7 +5893,6 @@ __metadata:
     prettier-plugin-tailwindcss: ^0.8.1
     typescript: ^5.5.3
     typescript-eslint: ^8.70.0
-    yarn: ^1.22.19
   languageName: unknown
   linkType: soft
 
@@ -6970,16 +6961,6 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^21.1.1
   checksum: 73b572e863aa4a8cbef323dd911d79d193b772defd5a51aab0aca2d446655216f5002c42c5306033968193bdbf892a7a4c110b0d77954a7fdf563e653967b56a
-  languageName: node
-  linkType: hard
-
-"yarn@npm:^1.22.19":
-  version: 1.22.22
-  resolution: "yarn@npm:1.22.22"
-  bin:
-    yarn: bin/yarn.js
-    yarnpkg: bin/yarn.js
-  checksum: 59aeef5ccfd3347287f939448e6d3594f0a42f74025b9bdc2a277641c1d4070c07a38b6e7c35e695f77410b0269a5a43c78535786564f86f39c9f781e6efa311
   languageName: node
   linkType: hard
 

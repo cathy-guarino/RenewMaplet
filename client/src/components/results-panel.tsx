@@ -61,7 +61,9 @@ export function ResultsPanel({
           <p className="mt-1 text-label text-muted-foreground">{totals}</p>
         </div>
 
-        <div className="grid shrink-0 grid-cols-2 gap-4 md:w-[580px]">
+        {/* 580px on a roomy desktop (reference/01), but allowed to shrink on a
+            narrow desktop so the title keeps its width instead of being overrun. */}
+        <div className="grid grid-cols-2 gap-4 md:w-[580px] md:min-w-0">
           <HeaderSelect
             label="Measure"
             value={measure}

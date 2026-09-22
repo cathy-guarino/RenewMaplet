@@ -16,7 +16,6 @@ Before editing, read in this order:
 - Comment domain decisions and surprising constraints, not obvious code.
 - Keep fixtures in tests. The application always uses live data.
 - Remove unused code before finishing.
-- Use the images in `reference/` as a visual guide for what we are building.
 - Log progress and decisions in BUILD_LOG whenever a notable change is made. 
 
 Before reporting completion, run `yarn check`, exercise the changed flow in a browser, and update `BUILD_LOG.md`.

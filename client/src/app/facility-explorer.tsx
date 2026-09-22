@@ -65,8 +65,12 @@ export function FacilityExplorer({
     setBreakdownState(next)
     setSelectedKey(null)
   }, [])
+  // Reset returns the whole view to defaults: scope, the measure and
+  // breakdown selects, and any open table.
   const reset = useCallback(() => {
     scopeApi.reset()
+    setMeasureState('facilities')
+    setBreakdownState('technology')
     setSelectedKey(null)
   }, [scopeApi])
   // Clicking a group opens its table; clicking the open group again closes it

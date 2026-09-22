@@ -38,4 +38,4 @@ Maps, facility detail pages, search, table filtering, downloads, accounts, saved
 
 ## Success
 
-Each customer question can be answered through the same flow, calculations follow `DATA_GUIDE.md`, and the interface matches the intent of the supplied screenshots.
+Each customer question can be answered through the same flow as per BEHAVIOUR_GUIDE.md, calculations follow `DATA_GUIDE.md`, and the interface matches the intent of the supplied screenshots.

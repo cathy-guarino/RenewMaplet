@@ -20,11 +20,6 @@ import { TECHNOLOGY_LABELS, UNIT_STATUS_LABELS } from '@/data/types'
  * 14px glyph — so they read as one family. They differ only in contrast:
  * technology is a solid coloured fill with a white glyph; status is the mirror,
  * a light coloured background with a dark coloured glyph.
- *
- * Departure from BEHAVIOUR_GUIDE.md, which describes status as symbols on
- * "very light circles": on request, status now matches the technology square in
- * size, weight and shape, distinguished by the inverted fill rather than by
- * being a smaller, lighter circle.
  */
 
 const TECHNOLOGY_ICON: Record<Technology, typeof Zap> = {

@@ -29,7 +29,6 @@ export const TECHNOLOGY_LABELS: Record<Technology, string> = {
   coal: 'Coal',
   distillate: 'Distillate',
   gas: 'Gas',
-  // TODO: double check this.
   // The live feed carries only onshore `wind` and `solar_utility`; the labels
   // are specific because the reference screenshots are. Offshore wind or
   // rooftop solar would need their own technologies rather than reusing these.
@@ -55,7 +54,11 @@ export const TECHNOLOGY_GROUPS = [
   technologies: readonly Technology[]
 }>
 
-/** Unit lifecycle. Labelled "Lifecycles" in the scope panel screenshots. */
+/**
+ * Unit status. Called "Unit status" throughout the UI for consistency with the
+ * breakdown column; the reference screenshots label the scope filter
+ * "Lifecycles", a divergence taken deliberately.
+ */
 export const UNIT_STATUSES = [
   'committed',
   'commissioning',

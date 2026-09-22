@@ -45,10 +45,13 @@ function FilterShell({
   // The badge marks a filter that narrows the default "all" state; selecting
   // every value is not a narrowing, so the caller reports 0 in that case.
   const narrowed = selectedCount > 0
+  // aria-labelledby is a space-separated list of ids, so a multi-word label
+  // ("Unit status") must slugify to a single id.
+  const labelId = `${label.replace(/\s+/g, '-')}-label`
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <span id={`${label}-label`} className="text-label font-medium">
+      <span id={labelId} className="text-label font-medium">
         {label}
       </span>
 
@@ -58,7 +61,7 @@ function FilterShell({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            aria-labelledby={`${label}-label`}
+            aria-labelledby={labelId}
             className="h-control w-full justify-between bg-surface px-3 font-normal shadow-none"
           >
             <span className="flex min-w-0 items-center gap-2">

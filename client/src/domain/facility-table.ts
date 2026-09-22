@@ -28,8 +28,12 @@ export interface FacilityRow {
   readonly state: StateCode | null
   /** Distinct technologies across the matching units, in canonical order. */
   readonly technologies: readonly Technology[]
-  /** Distinct unit statuses across the matching units, in canonical order. */
-  readonly statuses: readonly UnitStatus[]
+  /**
+   * One status per matching unit, in canonical order — so a facility with three
+   * operating units carries three `operating` entries. The table shows an icon
+   * for each, and `unitCount === unitStatuses.length`.
+   */
+  readonly unitStatuses: readonly UnitStatus[]
   /** Sum of matching units with known capacity, in MW. */
   readonly registeredMw: number
   readonly hasUnknownCapacity: boolean
@@ -76,7 +80,10 @@ function buildRow(entry: ScopedFacility, units: readonly Unit[]): FacilityRow {
     name: entry.facility.name,
     state: entry.facility.state,
     technologies: distinct(units, (u) => u.technology, TECHNOLOGIES),
-    statuses: distinct(units, (u) => u.status, UNIT_STATUSES),
+    // One entry per unit (not deduplicated), so the table can show an icon each.
+    unitStatuses: units
+      .map((u) => u.status)
+      .sort((a, b) => UNIT_STATUSES.indexOf(a) - UNIT_STATUSES.indexOf(b)),
     registeredMw,
     hasUnknownCapacity,
     unitCount: units.length,
@@ -116,14 +123,14 @@ export interface FacilitySort {
 /** Opening a group sorts by facility name, matching reference/05. */
 export const DEFAULT_FACILITY_SORT: FacilitySort = { field: 'facility', direction: 'asc' }
 
-// Multi-value columns sort by their leading (canonical-first) value.
+// The technology and status columns sort by their leading canonical value.
 const lead = <T extends string>(values: readonly T[], order: readonly T[]) =>
   values.length === 0 ? order.length : order.indexOf(values[0]!)
 
 const COMPARATORS: Record<SortField, (a: FacilityRow, b: FacilityRow) => number> = {
   facility: (a, b) => a.name.localeCompare(b.name),
   technology: (a, b) => lead(a.technologies, TECHNOLOGIES) - lead(b.technologies, TECHNOLOGIES),
-  status: (a, b) => lead(a.statuses, UNIT_STATUSES) - lead(b.statuses, UNIT_STATUSES),
+  status: (a, b) => lead(a.unitStatuses, UNIT_STATUSES) - lead(b.unitStatuses, UNIT_STATUSES),
   mw: (a, b) => a.registeredMw - b.registeredMw,
   units: (a, b) => a.unitCount - b.unitCount,
 }

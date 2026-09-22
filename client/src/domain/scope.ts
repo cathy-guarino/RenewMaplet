@@ -82,16 +82,3 @@ export function applyScope(facilities: readonly Facility[], scope: Scope): Scope
 
   return scoped
 }
-
-/**
- * Whether the scope narrows the default "all" state. Drives the selected-count
- * badge in the scope panel (BEHAVIOUR_GUIDE.md).
- */
-export function isScopeNarrowed(scope: Scope): boolean {
-  return (
-    scope.states.length > 0 ||
-    scope.technologies.length > 0 ||
-    scope.statuses.length > 0 ||
-    scope.commencement.kind !== 'any'
-  )
-}

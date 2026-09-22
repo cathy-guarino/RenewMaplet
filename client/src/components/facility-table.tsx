@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react'
 import { StatusIndicator, TechnologyIndicator } from '@/components/indicators'
-import { UNIT_STATUS_LABELS } from '@/data/types'
+import { UNIT_STATUS_LABELS, type UnitStatus } from '@/data/types'
 import {
   DEFAULT_FACILITY_SORT,
   sortFacilityRows,
@@ -17,10 +17,13 @@ import {
  *
  * The grid's leading two tracks (a 2.25rem gutter and the 14.4375rem technology
  * column) match the grouped-row grid above, so the technology icon lines up
- * under the group's icon and MW/Units sit under the group's right-hand columns.
- * Technology is the first and widest attribute column; Facility is the flexible
- * name column. Below `md` the grid keeps its width and the panel scrolls
- * horizontally, which BEHAVIOUR_GUIDE.md permits for dense narrow layouts.
+ * under the group's icon, and the trailing MW/Units tracks match too, so the
+ * Units count lines up under the group's Facilities column. Technology is the
+ * first attribute column and Facility the flexible name column. The Unit status
+ * column shows one status icon per unit plus a label ("Operating", or "Mixed"
+ * when they differ); it wraps and grows the row for the rare facility with many
+ * units. Below `md` the grid keeps its width and the panel scrolls horizontally,
+ * which BEHAVIOUR_GUIDE.md permits for dense narrow layouts.
  */
 
 const GRID =
@@ -128,13 +131,15 @@ function SortableHeader({
 function FacilityRowView({ row }: { row: FacilityRow }) {
   // A wholly-retired facility reads clearly quieter: muted text plus reduced
   // opacity so its technology icon fades too, matching the reference.
-  const retired = row.statuses.length === 1 && row.statuses[0] === 'retired'
+  const retired = row.unitStatuses.every((status) => status === 'retired')
   const tone = retired ? 'text-muted-foreground opacity-70' : 'text-foreground'
 
   return (
     <div
       role="row"
-      className={`${GRID} h-table-row border-b border-border bg-surface text-sm hover:bg-muted/60 ${tone}`}
+      // min-height, not a fixed height: a facility with many units wraps its
+      // status icons onto a second line and the row grows to fit.
+      className={`${GRID} min-h-table-row border-b border-border bg-surface py-1.5 text-sm hover:bg-muted/60 ${tone}`}
     >
       <span aria-hidden />
 
@@ -152,14 +157,18 @@ function FacilityRowView({ row }: { row: FacilityRow }) {
         {row.state && <span className="text-xs text-muted-foreground">{row.state}</span>}
       </Cell>
 
-      {/* Each status is named, so a mix reads e.g. "Operating · Committed". */}
-      <span role="cell" className="flex min-w-0 items-center gap-x-3 text-label">
-        {row.statuses.map((status) => (
-          <span key={status} className="flex min-w-0 items-center gap-1.5">
-            <StatusIndicator status={status} />
-            <span className="truncate">{UNIT_STATUS_LABELS[status]}</span>
-          </span>
-        ))}
+      {/* Keep the icons and fixed-width label together, shifted left so the
+          label begins at the Unit status column heading. */}
+      <span
+        role="cell"
+        className="flex min-w-0 -translate-x-[8.75rem] items-center gap-2 text-label"
+      >
+        <span className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1">
+          {row.unitStatuses.map((status, index) => (
+            <StatusIndicator key={index} status={status} />
+          ))}
+        </span>
+        <span className="w-28 shrink-0">{unitStatusLabel(row.unitStatuses)}</span>
       </span>
 
       <span role="cell" className="text-label tabular-nums">
@@ -170,6 +179,13 @@ function FacilityRowView({ row }: { row: FacilityRow }) {
       </span>
     </div>
   )
+}
+
+/** The shared status name when every unit agrees, otherwise "Mixed". */
+function unitStatusLabel(statuses: readonly UnitStatus[]): string {
+  const first = statuses[0]
+  if (first === undefined) return ''
+  return statuses.every((status) => status === first) ? UNIT_STATUS_LABELS[first] : 'Mixed'
 }
 
 function Cell({ children }: { children: ReactNode }) {

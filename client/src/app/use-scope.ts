@@ -23,7 +23,6 @@ export interface UseScope {
   readonly presets: readonly CommencementPreset[]
   /** Which commencement preset is active; the scope itself stores the range. */
   readonly presetId: string
-  readonly isNarrowed: boolean
   readonly setScope: (patch: Partial<Scope>) => void
   readonly setCommencementPreset: (presetId: string) => void
   readonly reset: () => void
@@ -56,18 +55,11 @@ export function useScope(facilities: readonly Facility[], now: Date = new Date()
     setPresetId(ANY_DATE_PRESET_ID)
   }, [])
 
-  const isNarrowed =
-    scope.states.length > 0 ||
-    scope.technologies.length > 0 ||
-    scope.statuses.length > 0 ||
-    scope.commencement.kind !== 'any'
-
   return {
     scope,
     options,
     presets,
     presetId,
-    isNarrowed,
     setScope,
     setCommencementPreset,
     reset,

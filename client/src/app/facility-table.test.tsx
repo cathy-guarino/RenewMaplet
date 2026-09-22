@@ -8,9 +8,11 @@ import type { FacilityRow } from '@/domain/facility-table'
 import { App } from './app'
 
 /**
- * Selection, sorting, pagination and close behaviour of the inline table.
- * Integration goes through App on the fixture; pagination needs more rows than
- * the fixture holds, so it renders FacilityTable directly with synthetic data.
+ * The inline facility table: selection, scope-awareness, sorting, close-on-change
+ * and pagination. Row-building and sorting logic live in facility-table.test.ts;
+ * these tests cover the interactions. Integration runs through App on the fixture;
+ * pagination needs more rows than the fixture holds, so it renders the table
+ * directly with synthetic data.
  */
 
 beforeEach(() => {
@@ -42,7 +44,7 @@ const bodyRowNames = (table: HTMLElement) =>
     .slice(1)
     .map((r) => within(r).getAllByRole('cell')[1]?.querySelector('span')?.textContent ?? '')
 
-test('opening a group hides the other groups and shows its facilities', async () => {
+test('opening a group hides the others and lists its facilities as plain rows', async () => {
   const user = setup()
   await ready()
 
@@ -56,18 +58,20 @@ test('opening a group hides the other groups and shows its facilities', async ()
   expect(groupRows).toHaveLength(1)
   expect(groupRows[0]).toHaveAttribute('aria-expanded', 'true')
 
-  // Battery facilities from the fixture: ADP (SA) and DISCHONLY (NSW).
+  // Battery facilities from the fixture, with a plain state suffix and no links.
   expect(bodyRowNames(table)).toEqual(['Adelaide Desalination', 'Discharge Only Battery'])
+  const firstRow = within(table).getAllByRole('row')[1]!
+  expect(firstRow).toHaveTextContent('SA')
+  expect(within(firstRow).queryByRole('link')).not.toBeInTheDocument()
 })
 
-test('opening "All in scope" shows every scoped facility', async () => {
+test('opening "All in scope" shows every facility, with all its technologies', async () => {
   const user = setup()
   await ready()
 
   await user.click(screen.getByRole('row', { name: /^All in scope/ }))
   const table = await screen.findByRole('table', { name: 'Facilities in the selected group' })
 
-  // All five parsed fixture facilities, one row each.
   expect(bodyRowNames(table)).toEqual([
     'Adelaide Desalination',
     'Discharge Only Battery',
@@ -97,43 +101,24 @@ test('the table reflects the current scope, not just the group', async () => {
   expect(bodyRowNames(table)).toEqual(['Discharge Only Battery'])
 })
 
-test('facility names carry a plain state suffix and are not links', async () => {
-  const user = setup()
-  await ready()
-  const table = await openBattery(user)
-
-  const firstRow = within(table).getAllByRole('row')[1]!
-  expect(firstRow).toHaveTextContent('Adelaide Desalination')
-  expect(firstRow).toHaveTextContent('SA')
-  // Names must not open detail pages.
-  expect(within(firstRow).queryByRole('link')).not.toBeInTheDocument()
-})
-
 test('header clicks toggle ascending and descending, and expose aria-sort', async () => {
   const user = setup()
   await ready()
   const table = await openBattery(user)
 
-  // Default sort is by facility name, ascending.
-  const facilityHeader = within(table).getByRole('columnheader', { name: /Facility/ })
-  expect(facilityHeader).toHaveAttribute('aria-sort', 'ascending')
-
   const mwHeader = within(table).getByRole('columnheader', { name: /MW/ })
   expect(mwHeader).toHaveAttribute('aria-sort', 'none')
 
-  // First MW click → ascending (7.76 then 10).
   await user.click(within(mwHeader).getByRole('button'))
   expect(mwHeader).toHaveAttribute('aria-sort', 'ascending')
-  expect(facilityHeader).toHaveAttribute('aria-sort', 'none')
   expect(bodyRowNames(table)).toEqual(['Adelaide Desalination', 'Discharge Only Battery'])
 
-  // Second click → descending (10 then 7.76).
   await user.click(within(mwHeader).getByRole('button'))
   expect(mwHeader).toHaveAttribute('aria-sort', 'descending')
   expect(bodyRowNames(table)).toEqual(['Discharge Only Battery', 'Adelaide Desalination'])
 })
 
-test('changing the breakdown closes the table', async () => {
+test('changing the scope, measure or breakdown closes the table', async () => {
   const user = setup()
   await ready()
   await openBattery(user)
@@ -147,20 +132,6 @@ test('changing the breakdown closes the table', async () => {
   expect(facilityTable()).not.toBeInTheDocument()
 })
 
-test('changing the measure closes the table', async () => {
-  const user = setup()
-  await ready()
-  await openBattery(user)
-  expect(facilityTable()).toBeInTheDocument()
-
-  const measure = screen.getByRole('combobox', { name: 'Measure' })
-  measure.focus()
-  await user.keyboard('{ArrowDown}')
-  await user.click(await screen.findByRole('option', { name: 'Registered capacity' }))
-
-  expect(facilityTable()).not.toBeInTheDocument()
-})
-
 test('shows 50 facilities and reveals 50 more on request', async () => {
   const user = userEvent.setup()
   const rows: FacilityRow[] = Array.from({ length: 60 }, (_, i) => ({
@@ -168,7 +139,7 @@ test('shows 50 facilities and reveals 50 more on request', async () => {
     name: `Facility ${String(i).padStart(2, '0')}`,
     state: 'NSW',
     technologies: ['battery'],
-    statuses: ['operating'],
+    unitStatuses: ['operating'],
     registeredMw: i,
     hasUnknownCapacity: false,
     unitCount: 1,

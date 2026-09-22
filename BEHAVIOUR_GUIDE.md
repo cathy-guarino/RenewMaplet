@@ -1,10 +1,10 @@
 # Behaviour guide
 
-Use `reference/` to judge hierarchy, density, alignment, and states. Live values will change; do not copy or assert exact totals.
+Use `reference/` to judge visual hierarchy, density, alignment, and states. Live values will change; do not copy or assert exact totals.
 
 ## Page structure
 
-- A 52px global header contains a globe, **RenewMaplet**, and reset action.
+- A 52px global header contains a globe icon, **RenewMaplet** text, and reset action.
 - A visually distinct left scope panel is about 264px on desktop.
 - The main panel contains one header row and either grouped results or the facility table.
 - Panels are flush, separated by full-height dividers, and scroll independently where needed.
@@ -21,9 +21,11 @@ Use `reference/` to judge hierarchy, density, alignment, and states. Live values
 
 ## Facility table
 
-Selecting a group replaces the other groups with that row and an inline table filling the remaining height. Changing scope, measure, or breakdown closes it.
-
-Columns: Technology, Facility with a plain state suffix, Unit status, MW, Units. Header clicks toggle sort; there is no header filtering. “Show more facilities” adds 50 rows. Facilities do not open detail views.
+- Selecting a group replaces the other groups with that row and an inline table filling the remaining height. Changing scope, measure, or breakdown closes it.
+- Columns: Technology, Facility with a plain state suffix, Unit status, MW, Units.
+- Header clicks toggle sort; there is no header filtering.
+- “Show more facilities” adds 50 rows.
+- Facilities do not open detail views.
 
 ## States and accessibility
 
@@ -36,9 +38,10 @@ Columns: Technology, Facility with a plain state suffix, Unit status, MW, Units.
 
 - Light mode, Geist Sans, compact neutrals.
 - Tokens: background `#fafafa`, foreground `#0a0a0a`, surface `#fff`, scope `#f5f5f5`, muted `#f2f2f2`, border `#e5e5e5`, muted text `#666`, header `#27272a`, header text `#fafafa`.
-- Avoid floating cards, gradients, tinted controls, excessive rounding, and decorative copy.
-- Technology uses compact colored squares, with tooltips when unlabeled.
-- Status uses small symbols on very light circles: green dot for operating, clock for committed, strike-circle for retired. State icons are neutral.
+- Avoid floating cards, gradients, tinted controls, excessive rounding, emojis, and decorative copy.
+- Technology uses compact bright coloured squares with icons, with tooltips when unlabeled.
+- Status uses compact light coloured squares with icons, with visible labels.
+- State icons are neutral.
 
 ## Acceptance scenarios
 
