@@ -64,6 +64,47 @@ test('narrowing a filter updates totals, summary and the count badge', async () 
   expect(totals()).toContain('132.5 MW')
 })
 
+test('the group "Only" action scopes to exactly that technology group', async () => {
+  const user = userEvent.setup()
+  await ready()
+
+  await openFilter(user, 'Technologies')
+  // Renewables = onshore wind + utility solar (battery is its own group now).
+  await user.click(screen.getByRole('button', { name: 'Only Renewables' }))
+  await user.keyboard('{Escape}')
+
+  // Both members selected; the summary collapses to the group name.
+  expect(filter('Technologies')).toHaveTextContent('2')
+  expect(filter('Technologies')).toHaveTextContent('Renewables')
+  // ADP (solar) and WESTWIND (wind); DISCHONLY (battery) is excluded.
+  expect(totals()).toContain('2 facilities')
+
+  // Both members show ticked; the header Clear returns to "all".
+  const reopened = await openFilter(user, 'Technologies')
+  for (const name of ['Onshore wind', 'Utility solar']) {
+    expect(within(reopened).getByRole('checkbox', { name })).toBeChecked()
+  }
+  await user.click(screen.getByRole('button', { name: 'Clear' }))
+  await user.keyboard('{Escape}')
+  expect(filter('Technologies')).toHaveTextContent('All technologies')
+  expect(totals()).toContain('5 facilities')
+})
+
+test('a single technology member narrows without collapsing to its group', async () => {
+  const user = userEvent.setup()
+  await ready()
+
+  // Wind is one of two renewables members, so the summary stays "Onshore wind".
+  const group = await openFilter(user, 'Technologies')
+  await user.click(within(group).getByRole('checkbox', { name: 'Onshore wind' }))
+  await user.keyboard('{Escape}')
+
+  expect(filter('Technologies')).toHaveTextContent('Onshore wind')
+  expect(filter('Technologies')).not.toHaveTextContent('Renewables')
+  // Only WESTWIND has a wind unit.
+  expect(totals()).toContain('1 facilities')
+})
+
 test('selecting every value is not a narrowing, so no badge appears', async () => {
   const user = userEvent.setup()
   await ready()
@@ -153,11 +194,12 @@ test('filters are operable by keyboard alone', async () => {
   const nsw = within(group).getByRole('checkbox', { name: 'NSW' })
   const sa = within(group).getByRole('checkbox', { name: 'SA' })
 
-  // The popover moves focus to its first option on open.
-  expect(nsw).toHaveFocus()
+  // Toggle by keyboard: focus a checkbox and press Space.
+  nsw.focus()
   await user.keyboard(' ')
   expect(nsw).toBeChecked()
 
+  // Tab moves to the next checkbox in order.
   await user.tab()
   expect(sa).toHaveFocus()
   await user.keyboard(' ')

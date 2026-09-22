@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import type { Option } from '@/domain/scope-options'
+import type { Option, TechnologyGroup } from '@/domain/scope-options'
 
 /**
  * A scope filter: a select-shaped trigger opening a popover of choices.
@@ -13,18 +13,32 @@ import type { Option } from '@/domain/scope-options'
  * filters are multi-select. The trigger carries `role="combobox"`, which is the
  * shadcn combobox pattern, so it reads and looks the same as the single-select
  * controls in the results header.
+ *
+ * `multi` adds the popover's header actions (Select all / Clear) and a Done
+ * footer, per the filter mockups. An empty selection means "all", so a fully
+ * checked filter is not a narrowing — Select all and Clear both return to that
+ * unnarrowed state.
  */
+interface MultiActions {
+  canSelectAll: boolean
+  canClear: boolean
+  onSelectAll: () => void
+  onClear: () => void
+}
+
 function FilterShell({
   label,
   icon,
   summary,
   selectedCount,
+  multi,
   children,
 }: {
   label: string
   icon: ReactNode
   summary: string
   selectedCount: number
+  multi?: MultiActions
   children: (close: () => void) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
@@ -66,18 +80,76 @@ function FilterShell({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent align="start" className="w-(--radix-popover-trigger-width) min-w-56 p-1.5">
-          {children(() => {
-            setOpen(false)
-          })}
+        {/* Fixed width and no inner scroll: the popover grows to fit its
+            options, matching the filter mockups. */}
+        <PopoverContent align="start" className="w-80 p-0">
+          {multi && (
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <span className="text-base font-semibold">{label}</span>
+              <span className="flex items-center gap-3 text-xs">
+                <HeaderAction onClick={multi.onSelectAll} disabled={!multi.canSelectAll}>
+                  Select all
+                </HeaderAction>
+                <HeaderAction onClick={multi.onClear} disabled={!multi.canClear} muted>
+                  Clear
+                </HeaderAction>
+              </span>
+            </div>
+          )}
+
+          <div className="p-2">
+            {children(() => {
+              setOpen(false)
+            })}
+          </div>
+
+          {multi && (
+            <div className="border-t border-border p-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                }}
+                className="w-full rounded-md bg-muted py-2.5 text-sm font-medium outline-none hover:bg-border"
+              >
+                Done
+              </button>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     </div>
   )
 }
 
+function HeaderAction({
+  onClick,
+  disabled,
+  muted = false,
+  children,
+}: {
+  onClick: () => void
+  disabled: boolean
+  muted?: boolean
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`font-medium outline-none hover:underline focus-visible:underline disabled:cursor-default disabled:no-underline disabled:opacity-40 ${
+        muted ? 'text-muted-foreground' : 'text-foreground'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+// Roomy rows to match the mockups: ~44px tall, 15px labels, generous gap.
 const ROW =
-  'flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-muted focus-within:bg-muted'
+  'flex cursor-pointer items-center gap-3 rounded-md px-2 py-2.5 text-[0.9375rem] hover:bg-muted focus-within:bg-muted'
 
 /** Multi-select filter. An empty selection means "all available values". */
 export function MultiScopeFilter<T extends string>({
@@ -105,6 +177,8 @@ export function MultiScopeFilter<T extends string>({
         .join(', ')
     : allLabel
 
+  // Checkboxes are literal: an empty selection means "all", shown as no boxes
+  // ticked. Members are added on click; Select all ticks every box.
   const toggle = (value: T) => {
     onChange(selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value])
   }
@@ -115,6 +189,16 @@ export function MultiScopeFilter<T extends string>({
       icon={icon}
       summary={summary}
       selectedCount={narrows ? selected.length : 0}
+      multi={{
+        canSelectAll: selected.length < options.length,
+        canClear: selected.length > 0,
+        onSelectAll: () => {
+          onChange(options.map((o) => o.value))
+        },
+        onClear: () => {
+          onChange([])
+        },
+      }}
     >
       {() => (
         <div role="group" aria-label={label} className="flex flex-col">
@@ -129,6 +213,118 @@ export function MultiScopeFilter<T extends string>({
               <span className="truncate">{option.label}</span>
             </label>
           ))}
+        </div>
+      )}
+    </FilterShell>
+  )
+}
+
+/**
+ * Multi-select filter whose options are grouped (renewables / fossil / …). Each
+ * group header names the family and offers "Only" to scope to just that group;
+ * members are still selectable individually and carry their technology icon.
+ * An empty selection means "all available values".
+ */
+export function GroupedMultiScopeFilter<T extends string>({
+  label,
+  icon,
+  allLabel,
+  groups,
+  selected,
+  onChange,
+  renderIcon,
+}: {
+  label: string
+  icon: ReactNode
+  allLabel: string
+  groups: readonly TechnologyGroup[]
+  selected: readonly T[]
+  onChange: (next: readonly T[]) => void
+  renderIcon: (value: T) => ReactNode
+}) {
+  const allValues = groups.flatMap((group) => group.options.map((o) => o.value as T))
+  const narrows = selected.length > 0 && selected.length < allValues.length
+
+  const summary = narrows
+    ? groups
+        .flatMap((group) => {
+          const values = group.options.map((o) => o.value as T)
+          const chosen = values.filter((v) => selected.includes(v))
+          // Collapse a fully-selected group to its name; otherwise list members.
+          if (chosen.length > 0 && chosen.length === values.length) return [group.label]
+          return group.options.filter((o) => selected.includes(o.value as T)).map((o) => o.label)
+        })
+        .join(', ')
+    : allLabel
+
+  const toggle = (value: T) => {
+    onChange(selected.includes(value) ? selected.filter((v) => v !== value) : [...selected, value])
+  }
+  // "Only" scopes to exactly this group (replacing the selection). Selecting
+  // every value collapses to the canonical "all" ([]).
+  const only = (values: readonly T[]) => {
+    onChange(values.length === allValues.length ? [] : values)
+  }
+
+  return (
+    <FilterShell
+      label={label}
+      icon={icon}
+      summary={summary}
+      selectedCount={narrows ? selected.length : 0}
+      multi={{
+        canSelectAll: selected.length < allValues.length,
+        canClear: selected.length > 0,
+        onSelectAll: () => {
+          onChange(allValues)
+        },
+        onClear: () => {
+          onChange([])
+        },
+      }}
+    >
+      {() => (
+        <div role="group" aria-label={label} className="flex flex-col">
+          {groups.map((group, index) => {
+            const values = group.options.map((o) => o.value as T)
+            return (
+              // A divider separates each group, as in the reference.
+              <div
+                key={group.id}
+                className={`flex flex-col ${index > 0 ? 'mt-1 border-t border-border pt-1' : ''}`}
+              >
+                <div className="flex items-center justify-between px-2 pt-3 pb-1">
+                  <span className="text-column font-medium tracking-wide text-muted-foreground uppercase">
+                    {group.label}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Only ${group.label}`}
+                    onClick={() => {
+                      only(values)
+                    }}
+                    className="text-xs font-medium text-muted-foreground outline-none hover:text-foreground hover:underline focus-visible:underline"
+                  >
+                    Only
+                  </button>
+                </div>
+                {group.options.map((option) => (
+                  <label key={option.value} className={ROW}>
+                    <Checkbox
+                      checked={selected.includes(option.value as T)}
+                      onCheckedChange={() => {
+                        toggle(option.value as T)
+                      }}
+                    />
+                    <span aria-hidden className="shrink-0">
+                      {renderIcon(option.value as T)}
+                    </span>
+                    <span className="truncate">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            )
+          })}
         </div>
       )}
     </FilterShell>

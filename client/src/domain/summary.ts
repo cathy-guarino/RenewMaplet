@@ -17,6 +17,9 @@ import type { ScopedFacility } from './scope'
 
 export type Breakdown = 'technology' | 'status' | 'state'
 
+/** Which number the view leads with. Both are always calculated. */
+export type Measure = 'facilities' | 'capacity'
+
 export interface Totals {
   /** Distinct facilities. */
   readonly facilityCount: number
@@ -151,4 +154,26 @@ export function groupScope(scoped: readonly ScopedFacility[], breakdown: Breakdo
     if (b.key === UNKNOWN_KEY) return -1
     return a.label.localeCompare(b.label)
   })
+}
+
+/** The value a row leads with, for the selected measure. */
+export function measureValue(totals: Totals, measure: Measure): number {
+  return measure === 'facilities' ? totals.facilityCount : totals.registeredMw
+}
+
+/**
+ * A group's bar length, as a fraction of the whole scope.
+ *
+ * The denominator is the "All in scope" row — the largest applicable figure,
+ * since no group can hold more distinct facilities or more capacity than the
+ * scope containing it. That keeps "All in scope" semantically distinct: it is
+ * the reference the others are read against, and always renders full.
+ *
+ * Under an overlapping breakdown the group fractions therefore sum to more
+ * than one, which is correct — each bar answers "how much of the scope is
+ * this?", not "what slice of a pie is this?".
+ */
+export function relativeShare(value: number, scopeTotal: number): number {
+  if (!Number.isFinite(value) || !Number.isFinite(scopeTotal) || scopeTotal <= 0) return 0
+  return Math.min(Math.max(value / scopeTotal, 0), 1)
 }

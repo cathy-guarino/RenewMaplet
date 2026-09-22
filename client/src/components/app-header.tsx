@@ -1,4 +1,4 @@
-import { Globe, RotateCcw } from 'lucide-react'
+import { Earth, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -10,7 +10,7 @@ export function AppHeader({ onReset }: { onReset?: () => void }) {
   return (
     <header className="flex h-header shrink-0 items-center justify-between gap-4 bg-header pr-6 pl-5 text-header-foreground">
       <div className="flex items-center gap-2.5">
-        <Globe aria-hidden className="size-[18px]" strokeWidth={1.75} />
+        <Earth aria-hidden className="size-[18px]" strokeWidth={1.75} />
         <span className="text-brand font-semibold">RenewMaplet</span>
       </div>
 

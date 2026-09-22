@@ -29,6 +29,7 @@ export const TECHNOLOGY_LABELS: Record<Technology, string> = {
   coal: 'Coal',
   distillate: 'Distillate',
   gas: 'Gas',
+  // TODO: double check this.
   // The live feed carries only onshore `wind` and `solar_utility`; the labels
   // are specific because the reference screenshots are. Offshore wind or
   // rooftop solar would need their own technologies rather than reusing these.
@@ -36,6 +37,23 @@ export const TECHNOLOGY_LABELS: Record<Technology, string> = {
   solar: 'Utility solar',
   other: 'Other',
 }
+
+/**
+ * Technology groups for the scope filter, so a user can scope a whole family at
+ * once. Fossil (coal, gas, distillate) answers Sally's comparison in
+ * PROJECT_OUTLINE.md; battery is its own Storage group because it is storage
+ * rather than generation.
+ */
+export const TECHNOLOGY_GROUPS = [
+  { id: 'renewables', label: 'Renewables', technologies: ['wind', 'solar'] },
+  { id: 'fossil', label: 'Fossil', technologies: ['coal', 'gas', 'distillate'] },
+  { id: 'storage', label: 'Storage', technologies: ['battery'] },
+  { id: 'other', label: 'Other', technologies: ['other'] },
+] as const satisfies ReadonlyArray<{
+  id: string
+  label: string
+  technologies: readonly Technology[]
+}>
 
 /** Unit lifecycle. Labelled "Lifecycles" in the scope panel screenshots. */
 export const UNIT_STATUSES = [

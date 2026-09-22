@@ -3,66 +3,85 @@
  *
  * Light mode only — BEHAVIOUR_GUIDE.md rules out parallel themes, so there is
  * deliberately no `.dark` block and no `prefers-color-scheme` override here.
- * Palette values come from the "Visual language" section of that guide.
  *
- * `:root` holds the raw values; `@theme inline` maps them to Tailwind utilities
- * so `bg-surface`, `text-muted-foreground`, `h-control` etc. resolve to tokens
- * rather than hardcoded values.
+ * Colours are expressed as Tailwind v4 palette variables by name
+ * (`var(--color-<hue>-<step>)`), so the palette can be reasoned about and
+ * retuned in one place — bump a step, swap a hue. Tailwind emits the full
+ * default palette to `:root`, so these resolve at runtime.
+ *
+ * Three neutrals are the exception: BEHAVIOUR_GUIDE.md's "Visual language"
+ * specifies exact hex values that do not sit on a Tailwind step, so they stay
+ * literal and are called out below.
+ *
+ * Note the palette is Tailwind v4's, which is a touch more saturated than the
+ * v3-era reference screenshots (those were also captured on a Display P3 screen,
+ * which desaturates further once read back as sRGB). Naming the colours favours
+ * the design system's intent over pixel-matching the screenshots.
+ *
+ * `:root` holds the semantic values; `@theme inline` maps them to Tailwind
+ * utilities so `bg-surface`, `text-muted-foreground`, `h-control` etc. resolve
+ * to tokens rather than hardcoded values.
  */
 
 :root {
   /* Surfaces and text */
-  --background: #fafafa;
-  --foreground: #0a0a0a;
-  --surface: #ffffff;
-  --scope: #f5f5f5;
-  --muted: #f2f2f2;
-  --muted-foreground: #666666;
-  --border: #e5e5e5;
+  --background: var(--color-neutral-50);
+  --foreground: var(--color-neutral-950);
+  --surface: var(--color-white);
+  --scope: var(--color-neutral-100);
+  --border: var(--color-neutral-200);
+  --muted: var(--color-neutral-100);
+  --muted-foreground: var(--color-neutral-500);
 
   /* Global header */
-  --header: #27272a;
-  --header-foreground: #fafafa;
+  --header: var(--color-zinc-800);
+  --header-foreground: var(--color-neutral-50);
 
   /* shadcn/ui contract — mapped onto the palette above. */
   --card: var(--surface);
   --card-foreground: var(--foreground);
   --popover: var(--surface);
   --popover-foreground: var(--foreground);
-  --primary: #0a0a0a;
-  --primary-foreground: #fafafa;
+  --primary: var(--color-neutral-950);
+  --primary-foreground: var(--color-neutral-50);
   --secondary: var(--muted);
   --secondary-foreground: var(--foreground);
   --accent: var(--muted);
   --accent-foreground: var(--foreground);
-  --destructive: #dc2626;
-  --destructive-foreground: #fafafa;
+  --destructive: var(--color-red-600);
+  --destructive-foreground: var(--color-neutral-50);
   --input: var(--border);
-  --ring: #a1a1aa;
+  --ring: var(--color-zinc-400);
 
-  /* Technology — compact colored squares. Semantic, not screen-specific. */
-  --technology-battery: #a78bfa;
-  --technology-coal: #94a3b8;
-  --technology-distillate: #f472b6;
-  --technology-gas: #fb923c;
-  --technology-wind: #60a5fa;
-  --technology-solar: #fbbf24;
-  --technology-hydro: #38bdf8;
-  --technology-other: #5eead4;
+  /* Technology — compact colored squares: a solid fill of this colour with a
+     white glyph on top, not a tint. One Tailwind 400 per technology. */
+  --technology-battery: var(--color-violet-400);
+  --technology-coal: var(--color-slate-400);
+  --technology-distillate: var(--color-pink-400);
+  --technology-gas: var(--color-orange-400);
+  --technology-wind: var(--color-sky-400);
+  --technology-solar: var(--color-amber-400);
+  --technology-other: var(--color-teal-400);
 
-  /* Unit status — small symbols on very light circles. */
-  --status-operating: #16a34a;
-  --status-operating-surface: #f0fdf4;
-  --status-committed: #ca8a04;
-  --status-committed-surface: #fefce8;
-  --status-retired: #9ca3af;
-  --status-retired-surface: #f4f4f5;
-  --status-unknown: #a1a1aa;
-  --status-unknown-surface: #fafafa;
+  /* Unit status — the mirror of the technology squares: a light background of
+     the hue with a dark foreground of the same hue (technology is the reverse,
+     a solid fill with a white glyph). Foreground at -700, background at -100.
+     Hues follow reference/03-status-breakdown.png: committed blue, commissioning
+     amber; retired and unknown are neutral greys. */
+  --status-operating: var(--color-lime-600);
+  --status-operating-surface: var(--color-lime-100);
+  --status-committed: var(--color-sky-600);
+  --status-committed-surface: var(--color-sky-100);
+  --status-commissioning: var(--color-yellow-600);
+  --status-commissioning-surface: var(--color-yellow-100);
+  --status-retired: var(--color-gray-600);
+  --status-retired-surface: var(--color-gray-100);
+  --status-unknown: var(--color-zinc-500);
+  --status-unknown-surface: var(--color-zinc-100);
 
   /* Relative-share bar */
-  --bar-fill: #0a0a0a;
-  --bar-track: #ececec;
+  --bar-fill: var(--color-neutral-950);
+  --bar-track: #ececec; /* BEHAVIOUR_GUIDE.md, between neutral-100/200 */
 
   /* Typography */
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -75,7 +94,8 @@
   --header-height: 52px;
   --scope-panel-width: 264px;
   --control-height: 2.25rem; /* 36px, the shadcn default; measured ~34px */
-  --row-height: 3.5rem; /* 56px */
+  --row-height: 3.5rem; /* 56px — grouped rows, which carry the share bar */
+  --table-row-height: 2.4375rem; /* 39px — denser facility-table rows (reference/05) */
   --panel-gutter: 1.25rem; /* 20px, scope panel */
   --main-gutter: 1.75rem; /* 28px, results panel */
 }
@@ -113,13 +133,14 @@
   --color-technology-gas: var(--technology-gas);
   --color-technology-wind: var(--technology-wind);
   --color-technology-solar: var(--technology-solar);
-  --color-technology-hydro: var(--technology-hydro);
   --color-technology-other: var(--technology-other);
 
   --color-status-operating: var(--status-operating);
   --color-status-operating-surface: var(--status-operating-surface);
   --color-status-committed: var(--status-committed);
   --color-status-committed-surface: var(--status-committed-surface);
+  --color-status-commissioning: var(--status-commissioning);
+  --color-status-commissioning-surface: var(--status-commissioning-surface);
   --color-status-retired: var(--status-retired);
   --color-status-retired-surface: var(--status-retired-surface);
   --color-status-unknown: var(--status-unknown);
@@ -134,8 +155,14 @@
   /* Recurring type roles, so components do not restate pixel sizes. */
   --text-brand: 0.9375rem; /* 15px — wordmark */
   --text-brand--line-height: 1.2;
-  --text-label: 0.8125rem; /* 13px — control labels, totals, column heads */
+  --text-label: 0.8125rem; /* 13px — control labels and scope totals */
   --text-label--line-height: 1.25rem;
+  --text-column: 0.6875rem; /* 11px — results column headings */
+  --text-column--line-height: 1rem;
+  /* 15px — the numeric columns sit a step above the 14px labels beside them,
+     which is how the reference makes the figures scan. */
+  --text-figure: 0.9375rem;
+  --text-figure--line-height: 1.25rem;
   --text-title: 1.25rem; /* 20px — results heading */
   --text-title--line-height: 1.75rem;
 
@@ -148,6 +175,7 @@
   --spacing-scope-panel: var(--scope-panel-width);
   --spacing-control: var(--control-height);
   --spacing-row: var(--row-height);
+  --spacing-table-row: var(--table-row-height);
   --spacing-panel-gutter: var(--panel-gutter);
   --spacing-main-gutter: var(--main-gutter);
 }

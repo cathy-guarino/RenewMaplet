@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { facilitiesResponse } from '@tests/fixtures/facilities-response'
 import { parseFacilitiesResponse } from '@/data/parse-facilities'
-import { ANY_DATE_PRESET_ID, availableScopeOptions, commencementPresets } from './scope-options'
+import {
+  ANY_DATE_PRESET_ID,
+  availableScopeOptions,
+  commencementPresets,
+  technologyGroups,
+} from './scope-options'
 
 const facilities = parseFacilitiesResponse(facilitiesResponse)
 
@@ -65,5 +70,31 @@ describe('commencementPresets', () => {
       fromYear: 2021,
       toYear: null,
     })
+  })
+})
+
+describe('technologyGroups', () => {
+  it('organises available technologies into renewables, fossil, storage and other', () => {
+    const options = availableScopeOptions(facilities).technologies
+    const groups = technologyGroups(options)
+
+    expect(groups.map((g) => g.id)).toEqual(['renewables', 'fossil', 'storage', 'other'])
+    expect(groups.find((g) => g.id === 'renewables')?.options.map((o) => o.value)).toEqual([
+      'wind',
+      'solar',
+    ])
+    // The fixture has coal but no gas or distillate, so fossil holds only coal.
+    expect(groups.find((g) => g.id === 'fossil')?.options.map((o) => o.value)).toEqual(['coal'])
+    // Battery is its own storage group.
+    expect(groups.find((g) => g.id === 'storage')?.options.map((o) => o.value)).toEqual(['battery'])
+  })
+
+  it('drops groups with no available members', () => {
+    const onlyWind = availableScopeOptions(facilities).technologies.filter(
+      (o) => o.value === 'wind',
+    )
+    const groups = technologyGroups(onlyWind)
+    expect(groups.map((g) => g.id)).toEqual(['renewables'])
+    expect(groups[0]?.options.map((o) => o.value)).toEqual(['wind'])
   })
 })

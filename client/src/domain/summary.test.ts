@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { facilitiesResponse } from '@tests/fixtures/facilities-response'
 import { parseFacilitiesResponse } from '@/data/parse-facilities'
 import { DEFAULT_SCOPE, applyScope, type Scope } from './scope'
-import { groupScope, totalsForScope, type Breakdown } from './summary'
+import { groupScope, measureValue, relativeShare, totalsForScope, type Breakdown } from './summary'
 
 const facilities = parseFacilitiesResponse(facilitiesResponse)
 const scopeWith = (overrides: Partial<Scope>): Scope => ({ ...DEFAULT_SCOPE, ...overrides })
@@ -159,5 +159,59 @@ describe('grouping by status', () => {
 describe('empty results', () => {
   it('produces no groups when nothing is in scope', () => {
     expect(groupsBy('technology', { states: ['QLD'] })).toEqual([])
+  })
+})
+
+describe('measure and relative share', () => {
+  const scoped = scopedBy()
+  const totals = totalsForScope(scoped)
+
+  it('reads the leading value for each measure', () => {
+    expect(measureValue(totals, 'facilities')).toBe(5)
+    expect(measureValue(totals, 'capacity')).toBeCloseTo(TOTAL_MW, 6)
+  })
+
+  it('scales a group against the whole scope, not the largest group', () => {
+    const groups = groupScope(scoped, 'technology')
+    const coal = groups.find((g) => g.key === 'coal')
+
+    // Coal holds the most MW but only one of five facilities, so by the
+    // facilities measure its bar is short — the behaviour visible in
+    // reference/01-default.png.
+    expect(relativeShare(measureValue(coal!, 'facilities'), totals.facilityCount)).toBeCloseTo(
+      1 / 5,
+      6,
+    )
+    expect(relativeShare(measureValue(coal!, 'capacity'), totals.registeredMw)).toBeCloseTo(
+      500 / TOTAL_MW,
+      6,
+    )
+  })
+
+  it('never exceeds one, because no group is larger than its scope', () => {
+    for (const group of groupScope(scoped, 'technology')) {
+      expect(
+        relativeShare(measureValue(group, 'facilities'), totals.facilityCount),
+      ).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('returns zero rather than dividing by zero on an empty scope', () => {
+    expect(relativeShare(0, 0)).toBe(0)
+    expect(relativeShare(5, 0)).toBe(0)
+  })
+
+  it('sums group shares above one for overlapping breakdowns, exactly one for state', () => {
+    const byTechnology = groupScope(scoped, 'technology').reduce(
+      (sum, g) => sum + relativeShare(measureValue(g, 'facilities'), totals.facilityCount),
+      0,
+    )
+    const byState = groupScope(scoped, 'state').reduce(
+      (sum, g) => sum + relativeShare(measureValue(g, 'facilities'), totals.facilityCount),
+      0,
+    )
+
+    expect(byTechnology).toBeGreaterThan(1)
+    expect(byState).toBeCloseTo(1, 6)
   })
 })

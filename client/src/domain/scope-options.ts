@@ -10,6 +10,7 @@
 import {
   STATES,
   TECHNOLOGIES,
+  TECHNOLOGY_GROUPS,
   TECHNOLOGY_LABELS,
   UNIT_STATUSES,
   UNIT_STATUS_LABELS,
@@ -23,6 +24,31 @@ import type { CommencementFilter } from './scope'
 export interface Option<T> {
   readonly value: T
   readonly label: string
+}
+
+/** A technology group with only the members present in the loaded data. */
+export interface TechnologyGroup {
+  readonly id: string
+  readonly label: string
+  readonly options: readonly Option<Technology>[]
+}
+
+/**
+ * Groups the available technologies into renewables / fossil / other for the
+ * scope filter. Empty groups and absent members are dropped, so the filter only
+ * offers what the data contains — consistent with `availableScopeOptions`.
+ */
+export function technologyGroups(
+  available: readonly Option<Technology>[],
+): readonly TechnologyGroup[] {
+  const present = new Map(available.map((option) => [option.value, option]))
+  return TECHNOLOGY_GROUPS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    options: group.technologies
+      .filter((technology) => present.has(technology))
+      .map((technology) => present.get(technology)!),
+  })).filter((group) => group.options.length > 0)
 }
 
 export interface ScopeOptions {

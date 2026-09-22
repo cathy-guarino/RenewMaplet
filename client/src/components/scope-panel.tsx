@@ -1,7 +1,16 @@
 import { Activity, Atom, Calendar, MapPin } from 'lucide-react'
-import { MultiScopeFilter, SingleScopeFilter } from '@/components/scope-filter'
+import {
+  GroupedMultiScopeFilter,
+  MultiScopeFilter,
+  SingleScopeFilter,
+} from '@/components/scope-filter'
+import { TechnologyIndicator } from '@/components/indicators'
 import type { StateCode, Technology, UnitStatus } from '@/data/types'
-import type { CommencementPreset, ScopeOptions } from '@/domain/scope-options'
+import {
+  technologyGroups,
+  type CommencementPreset,
+  type ScopeOptions,
+} from '@/domain/scope-options'
 import type { Scope } from '@/domain/scope'
 
 const ICON = 'size-4'
@@ -40,15 +49,18 @@ export function ScopePanel({
         }}
       />
 
-      <MultiScopeFilter<Technology>
+      <GroupedMultiScopeFilter<Technology>
         label="Technologies"
         icon={<Atom className={ICON} />}
         allLabel="All technologies"
-        options={options.technologies}
+        groups={technologyGroups(options.technologies)}
         selected={scope.technologies}
         onChange={(technologies) => {
           onChange({ technologies })
         }}
+        renderIcon={(technology) => (
+          <TechnologyIndicator technology={technology} labelled={false} />
+        )}
       />
 
       <MultiScopeFilter<UnitStatus>
